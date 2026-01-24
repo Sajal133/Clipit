@@ -1,0 +1,19 @@
+node_modules/
+dist/
+build/
+release/
+*.log
+.DS_Store
+*.db
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+
+# Test files
+test-*.js
+view-clipboard.js

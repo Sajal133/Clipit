@@ -1,0 +1,8 @@
+{
+    "name": "test-overlay",
+    "version": "1.0.0",
+    "main": "test-overlay.js",
+    "scripts": {
+        "test": "electron test-overlay.js"
+    }
+}
