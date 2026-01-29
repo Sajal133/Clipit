@@ -1,11 +1,11 @@
 # 📋 Clipit - Never Lose What You Copy Again
 
-> **Smart clipboard manager for macOS and Windows** - Automatically save your clipboard history and access it with a single keyboard shortcut.
+> **Smart clipboard manager for macOS** - Automatically save your clipboard history and access it with a single keyboard shortcut.
 
 ## ✨ Features
 
 - **📋 Automatic Clipboard History** - Saves everything you copy (text & images)
-- **⚡ Lightning Fast Access** - Press `⌘ + Shift + V` (Mac) or `Ctrl + Shift + V` (Windows)
+- **⚡ Lightning Fast Access** - Press `⌘ + Shift + V` to open history
 - **🔍 Smart Search** - Quickly find items with built-in search bar
 - **🖼️ Image Support** - Preview and paste copied images with thumbnails
 - **🔢 Quick Selection** - Press 1-9 to instantly select visible items
@@ -17,40 +17,34 @@
 
 ## 🚀 Quick Start
 
-1. **Copy** anything as usual (`⌘/Ctrl + C`)
-2. **Open clipboard history** by pressing:
-   - macOS: `⌘ + Shift + V`
-   - Windows: `Ctrl + Shift + V`
+1. **Copy** anything as usual (`⌘ + C`)
+2. **Open clipboard history** by pressing `⌘ + Shift + V`
 3. **Search** (optional) - Type to filter items
 4. **Select an item**:
    - Press `1-9` for quick selection
    - Click with mouse
    - Use arrow keys + Enter
-5. **Paste** the selected item (`⌘/Ctrl + V`)
+5. **Paste** the selected item (`⌘ + V`)
 
 ## 📥 Installation
 
 ### macOS
-1. Download the app
-2. Drag Clipit to Applications folder
-3. Launch Clipit
+1. Download `Clipit-1.0.0-universal.dmg` from releases
+2. Open the DMG and drag Clipit to Applications folder
+3. Launch Clipit from Applications
 4. Grant Accessibility permission when prompted (needed for global shortcuts)
    - System Settings → Privacy & Security → Accessibility → Add Clipit
 
-### Windows
-1. Download the installer or portable version
-2. Run the executable
-3. If SmartScreen appears, click "More info" → "Run anyway"
-4. The app will appear in your system tray
+> **Note**: Currently, Clipit only supports macOS (Universal binary for Intel and Apple Silicon). Windows support may be added in future releases.
 
 ## ⌨️ Keyboard Shortcuts
 
-| Action | macOS | Windows |
-|--------|-------|---------|
-| Open History | `⌘ + Shift + V` | `Ctrl + Shift + V` |
-| Select Item 1-9 | `1-9` | `1-9` |
-| Delete Item | `Delete` / `Backspace` | `Delete` / `Backspace` |
-| Close Window | `Esc` | `Esc` |
+| Action | Shortcut |
+|--------|----------|
+| Open History | `⌘ + Shift + V` |
+| Select Item 1-9 | `1-9` |
+| Delete Item | `Delete` / `Backspace` |
+| Close Window | `Esc` |
 
 **Note:** When search bar is focused, keyboard shortcuts don't interfere with typing.
 
@@ -77,7 +71,7 @@ Access settings through the system tray icon:
 
 ### Basic Workflow
 ```
-Copy → Copy → Copy → Shortcut (⌘/Ctrl+Shift+V) → Search/Select → Paste
+Copy → Copy → Copy → Shortcut (⌘+Shift+V) → Search/Select → Paste
 ```
 
 ### Searching
@@ -97,10 +91,6 @@ Copy → Copy → Copy → Shortcut (⌘/Ctrl+Shift+V) → Search/Select → Pas
 ### macOS
 - **App Data**: `~/Library/Application Support/clipit/`
 - **Database**: `~/Library/Application Support/clipit/clipboard.db`
-
-### Windows
-- **App Data**: `%APPDATA%\clipit\`
-- **Database**: `%APPDATA%\clipit\clipboard.db`
 
 ## 🛠️ Development
 
@@ -125,8 +115,7 @@ npm start
 npm run build
 
 # Package for distribution
-npm run pack:mac   # macOS
-npm run pack:win   # Windows
+npm run pack:mac   # macOS (Universal: Intel + Apple Silicon)
 ```
 
 ### Project Structure
@@ -174,20 +163,6 @@ clipit/
 2. Click "Open" in the dialog
 3. Only needed first time
 
-### Windows
-
-#### "Windows protected your PC"
-**Solution:**
-1. Click "More info"
-2. Click "Run anyway"
-3. This is normal for unsigned apps
-
-#### App won't start
-**Solution:**
-- Install Microsoft Visual C++ Redistributable
-- Download from Microsoft's website
-- Restart and try again
-
 ### General Issues
 
 #### History not saving
@@ -215,7 +190,9 @@ You can delete the app data folder anytime to remove all saved clipboard history
 
 ## 📝 What's New in v1.0
 
-### Latest Updates
+### Latest Updates (January 30, 2026)
+- ✅ **Fixed app shutdown issue** - Application now properly quits without leaving background processes
+- ✅ **Fixed blank settings window** - Settings window now displays correctly in packaged DMG
 - ✅ **Search functionality** - Filter clipboard items in real-time
 - ✅ **Unlimited scrolling** - View all items, not just first 9
 - ✅ **Fixed pause/resume** - Tray menu now shows correct monitoring state
@@ -223,6 +200,8 @@ You can delete the app data folder anytime to remove all saved clipboard history
 - ✅ **Number sync** - Displayed numbers match keyboard shortcuts when filtering
 
 ### Recent Fixes
+- Fixed app not terminating all processes when quit via tray menu
+- Fixed settings window appearing blank in production DMG (file case sensitivity issue)
 - Fixed search bar editing (backspace/delete now work)
 - Fixed keyboard shortcuts interfering with search input
 - Fixed item number mismatch after filtering
