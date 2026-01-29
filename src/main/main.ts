@@ -7,6 +7,7 @@ import { registerShortcuts, unregisterAllShortcuts } from './shortcuts';
 import { setupIPC } from './ipc';
 
 let overlayWindow: BrowserWindow | null = null;
+let isQuitting = false;
 
 function createOverlayWindow(): BrowserWindow {
     const win = new BrowserWindow({
@@ -36,10 +37,12 @@ function createOverlayWindow(): BrowserWindow {
         }
     });
 
-    // Prevent window from being destroyed when closed
+    // Prevent window from being destroyed when closed (unless app is quitting)
     win.on('close', (e) => {
-        e.preventDefault();
-        win.hide();
+        if (!isQuitting) {
+            e.preventDefault();
+            win.hide();
+        }
     });
 
     return win;
@@ -97,10 +100,20 @@ app.on('before-quit', () => {
     console.log('🛑 Clipit Shutting Down...');
     console.log('=================================');
 
+    // Set quit flag to allow window destruction
+    isQuitting = true;
+
+    // Clean up resources
     clipboardMonitor.stop();
     unregisterAllShortcuts();
     destroyTray();
     dbService.close();
+
+    // Force destroy overlay window
+    if (overlayWindow && !overlayWindow.isDestroyed()) {
+        overlayWindow.destroy();
+        overlayWindow = null;
+    }
 
     console.log('✅ Cleanup complete');
 });
