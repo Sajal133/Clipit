@@ -1,6 +1,7 @@
 import { Menu, Tray, BrowserWindow, app, nativeImage } from 'electron';
 import path from 'path';
 import { clipboardMonitor } from './clipboard';
+import { createSettingsWindow } from './settings-window';
 
 let tray: Tray | null = null;
 
@@ -90,7 +91,6 @@ export function initTray(overlayWindow: BrowserWindow): void {
         {
             label: 'Settings...',
             click: () => {
-                const { createSettingsWindow } = require('./settings-window');
                 createSettingsWindow();
             }
         },

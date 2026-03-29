@@ -98,15 +98,15 @@ class ClipboardMonitor {
         }
 
         const sizeKB = Math.round(imageBuffer.length / 1024);
-        // const preview = `Image (${sizeKB} KB)`; // Preview is now set directly in addItem
 
         dbService.addItem({
             type: 'image',
             imageData: imageBuffer,
+            contentHash: imageHash,
             timestamp: Date.now(),
-            preview: `Image (${Math.round(imageBuffer.length / 1024)} KB)`
+            preview: `Image (${sizeKB} KB)`
         });
-        console.log(`🖼️  Saved image: ${Math.round(imageBuffer.length / 1024)} KB`);
+        console.log(`🖼️  Saved image: ${sizeKB} KB`);
         this.lastImageHash = imageHash;
 
         // Notify overlay to refresh
@@ -116,9 +116,11 @@ class ClipboardMonitor {
     }
 
     private hashImage(buffer: Buffer): string {
-        // Simple hash: first 16 bytes + length
-        const sample = buffer.slice(0, 16).toString('hex');
-        return `${sample}-${buffer.length}`;
+        // Use crypto SHA-256 on a sample for reliable change detection
+        const sampleSize = Math.min(buffer.length, 1024);
+        const sample = buffer.slice(0, sampleSize);
+        const hash = crypto.createHash('sha256').update(sample).digest('hex').substring(0, 16);
+        return `${hash}-${buffer.length}`;
     }
 
     getStatus(): boolean {

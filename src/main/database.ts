@@ -36,6 +36,7 @@ class DatabaseService {
         type TEXT NOT NULL,
         content TEXT,
         image_data BLOB,
+        content_hash TEXT,
         timestamp INTEGER NOT NULL,
         preview TEXT
       )
@@ -48,11 +49,28 @@ class DatabaseService {
       )
     `);
 
+        // Migrate: add content_hash column if it doesn't exist (for existing databases)
+        this.migrateDatabase();
+
         // Set default settings
         this.setDefaultSettings();
         this.save();
         this.isReady = true;
         console.log('Database initialized');
+    }
+
+    private migrateDatabase(): void {
+        if (!this.db) return;
+
+        // Check if content_hash column exists
+        const tableInfo = this.db.exec('PRAGMA table_info(clipboard_items)');
+        if (tableInfo.length > 0) {
+            const columns = tableInfo[0].values.map(row => row[1] as string);
+            if (!columns.includes('content_hash')) {
+                this.db.run('ALTER TABLE clipboard_items ADD COLUMN content_hash TEXT');
+                console.log('✅ Migrated: added content_hash column');
+            }
+        }
     }
 
     private setDefaultSettings() {
@@ -94,11 +112,11 @@ class DatabaseService {
                     console.log(`🗑️  Removed duplicate text (ID: ${id})`);
                 });
             }
-        } else if (item.type === 'image' && item.imageData) {
-            const preview = `Image (${Math.round(item.imageData.length / 1024)} KB)`;
+        } else if (item.type === 'image' && item.contentHash) {
+            // Use content hash for accurate deduplication
             const existing = this.db.exec(
-                'SELECT id FROM clipboard_items WHERE type = ? AND preview = ?',
-                ['image', preview]
+                'SELECT id FROM clipboard_items WHERE type = ? AND content_hash = ?',
+                ['image', item.contentHash]
             );
 
             if (existing.length > 0 && existing[0].values.length > 0) {
@@ -111,12 +129,13 @@ class DatabaseService {
         }
 
         this.db.run(
-            `INSERT INTO clipboard_items (type, content, image_data, timestamp, preview)
-       VALUES (?, ?, ?, ?, ?)`,
+            `INSERT INTO clipboard_items (type, content, image_data, content_hash, timestamp, preview)
+       VALUES (?, ?, ?, ?, ?, ?)`,
             [
                 item.type,
                 item.content || null,
                 item.imageData || null,
+                item.contentHash || null,
                 item.timestamp,
                 item.preview
             ]
@@ -129,12 +148,15 @@ class DatabaseService {
         return result[0].values[0][0] as number;
     }
 
-    getRecentItems(limit: number = 50): ClipboardItem[] {
+    getRecentItems(limit?: number): ClipboardItem[] {
         if (!this.db) return [];
+
+        // Use the configured historyLimit if no explicit limit is passed
+        const effectiveLimit = limit ?? parseInt(this.getSetting('historyLimit') || '50');
 
         const result = this.db.exec(
             `SELECT * FROM clipboard_items ORDER BY timestamp DESC LIMIT ?`,
-            [limit]
+            [effectiveLimit]
         );
 
         if (result.length === 0) return [];
@@ -147,12 +169,41 @@ class DatabaseService {
             columns.forEach((col, idx) => {
                 if (col === 'image_data' && row[idx]) {
                     item.imageData = row[idx] as Buffer;
+                } else if (col === 'content_hash') {
+                    item.contentHash = row[idx];
                 } else {
                     item[col] = row[idx];
                 }
             });
             return item as ClipboardItem;
         });
+    }
+
+    getItemById(id: number): ClipboardItem | null {
+        if (!this.db) return null;
+
+        const result = this.db.exec(
+            'SELECT * FROM clipboard_items WHERE id = ?',
+            [id]
+        );
+
+        if (result.length === 0 || result[0].values.length === 0) return null;
+
+        const columns = result[0].columns;
+        const row = result[0].values[0];
+        const item: any = {};
+
+        columns.forEach((col, idx) => {
+            if (col === 'image_data' && row[idx]) {
+                item.imageData = row[idx] as Buffer;
+            } else if (col === 'content_hash') {
+                item.contentHash = row[idx];
+            } else {
+                item[col] = row[idx];
+            }
+        });
+
+        return item as ClipboardItem;
     }
 
     deleteItem(id: number): void {

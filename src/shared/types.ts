@@ -3,6 +3,7 @@ export interface ClipboardItem {
     type: 'text' | 'image';
     content?: string;
     imageData?: Buffer;
+    contentHash?: string;
     timestamp: number;
     preview: string;
 }

@@ -1,7 +1,10 @@
 import { globalShortcut, BrowserWindow } from 'electron';
 import { dbService } from './database';
 
+let currentOverlayWindow: BrowserWindow | null = null;
+
 export function registerShortcuts(overlayWindow: BrowserWindow): void {
+    currentOverlayWindow = overlayWindow;
     const shortcut = dbService.getSetting('globalShortcut') || 'CommandOrControl+Shift+V';
 
     const registered = globalShortcut.register(shortcut, () => {
@@ -32,6 +35,18 @@ export function registerShortcuts(overlayWindow: BrowserWindow): void {
     } else {
         console.error(`❌ Failed to register shortcut: ${shortcut}`);
     }
+}
+
+export function reRegisterShortcuts(): void {
+    if (!currentOverlayWindow) {
+        console.error('❌ No overlay window reference for shortcut re-registration');
+        return;
+    }
+    // Unregister all existing shortcuts first
+    globalShortcut.unregisterAll();
+    console.log('🔄 Re-registering shortcuts with new settings...');
+    // Re-register with the latest settings from DB
+    registerShortcuts(currentOverlayWindow);
 }
 
 export function unregisterAllShortcuts(): void {
